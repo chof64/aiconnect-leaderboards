@@ -24,13 +24,11 @@ const elements = {
   participantSummary: document.querySelector("#participant-summary"),
   participantDisplayName: document.querySelector("#participant-display-name"),
   participantAvatar: document.querySelector("#participant-avatar"),
-  changeParticipant: document.querySelector("#change-participant"),
   systemsList: document.querySelector("#systems-list"),
   leaderboardList: document.querySelector("#leaderboard-list")
 };
 
 elements.participantForm.addEventListener("submit", handleRegistration);
-elements.changeParticipant.addEventListener("click", resetParticipant);
 elements.systemsList.addEventListener("click", handleVoteClick);
 
 async function initialize() {
@@ -166,15 +164,6 @@ async function handleVoteClick(event) {
   }
 }
 
-function resetParticipant() {
-  if (!window.confirm("Change participant? Your saved session on this browser will be cleared. Your existing vote remains in the leaderboard.")) return;
-  clearParticipant();
-  renderParticipant();
-  renderSystems();
-  renderStats();
-  showNotice("Your browser session was cleared. Registering a different name will create a separate participant.", "success");
-}
-
 function clearParticipant() {
   localStorage.removeItem(CREDENTIAL_KEY);
   localStorage.removeItem(NAME_KEY);
@@ -233,7 +222,7 @@ function renderSystems() {
     const button = document.createElement("button");
     button.type = "button";
     button.dataset.voteSystem = system.id;
-    button.className = `button vote-button ${state.currentVote === system.id ? "vote-button is-current" : "button-quiet"}`;
+    button.className = `button vote-button ${state.currentVote === system.id ? "is-current" : "button-quiet"}`;
     button.textContent = state.currentVote === system.id ? "Your vote ✓" : state.currentVote ? "Change vote" : "Vote";
     button.disabled = !state.credential || !state.votingOpen || state.busy;
     button.setAttribute("aria-label", `${state.currentVote === system.id ? "Current vote:" : "Vote for"} ${system.name}`);
