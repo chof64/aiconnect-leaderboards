@@ -5,8 +5,8 @@ A lightweight voting app for AIConnect bootcamp teams, built with a Cloudflare W
 ## MVP behavior
 
 - Participants register using a name only; no accounts or passwords.
-- Each participant has one active vote and can change it while voting is open.
-- The leaderboard is public at all times.
+- Each participant can rate every system from 1 to 5, and can edit ratings while voting is open.
+- The public leaderboard ranks systems by average rating and shows total points and rating counts.
 - Voting can be opened or closed by an organizer with access to the D1 database.
 - No Cloudflare Turnstile or third-party frontend framework.
 
@@ -55,13 +55,13 @@ The starter `systems.csv` contains only its header until the team list is ready.
 ## API
 
 - `GET /api/status` — voting status
-- `GET /api/systems` — approved teams and current vote totals
-- `GET /api/leaderboard` — public totals and rankings
+- `GET /api/systems` — approved teams and rating summaries
+- `GET /api/leaderboard` — public average ratings, total points, rating counts, and rankings
 - `POST /api/participants` — register a display name and receive an opaque participant credential
-- `GET /api/me` — retrieve the current participant's vote (Bearer credential required)
-- `PUT /api/vote` — create or change a vote (Bearer credential required; voting must be open)
+- `GET /api/me` — retrieve the current participant's ratings (Bearer credential required)
+- `PUT /api/ratings` — create or update a 1–5 rating for a system (Bearer credential required; voting must be open)
 
-Participant names are normalized for duplicate detection. A random credential is stored in the browser so a participant can change their vote without signing in again. Only a hash of that credential is stored in D1. Name-only registration is appropriate for a casual demo, not a formal election; it does not verify real-world identity.
+Participant names are normalized for duplicate detection. A random credential is stored in the browser so a participant can edit their ratings without signing in again. Only a hash of that credential is stored in D1. Name-only registration is appropriate for a casual demo, not a formal election; it does not verify real-world identity.
 
 ## Voting administration
 
@@ -79,7 +79,7 @@ Reopen voting:
 UPDATE voting_config SET is_open = 1 WHERE id = 1;
 ```
 
-The Worker checks voting status in the same SQL statement that writes a vote, so a request cannot sneak in after the vote is closed.
+The Worker checks voting status in the same SQL statement that writes a rating, so a request cannot sneak in after voting is closed. Each participant can have at most one rating per system. Rankings are based on average rating; total points and rating counts are shown as context.
 
 ## Development and deployment
 
