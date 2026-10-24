@@ -93,6 +93,10 @@ async function getSystemsWithVotes(env) {
   let previousAverage = null;
   let currentRank = 0;
   results.forEach((system, index) => {
+    if (system.ratingCount === 0) {
+      system.rank = null;
+      return;
+    }
     if (system.averageRating !== previousAverage) currentRank = index + 1;
     system.rank = currentRank;
     previousAverage = system.averageRating;
