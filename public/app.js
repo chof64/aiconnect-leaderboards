@@ -260,7 +260,7 @@ function renderLeaderboard() {
     item.className = "leaderboard-item";
     const rank = document.createElement("span");
     rank.className = "rank";
-    rank.textContent = `#${system.rank}`;
+    rank.textContent = system.rank ? `#${system.rank}` : "—";
     const detail = document.createElement("div");
     detail.className = "leaderboard-detail";
     const name = document.createElement("div");
