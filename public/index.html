@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101827">
+  <meta name="description" content="Vote for your favorite AIConnect bootcamp system and follow the public leaderboard.">
+  <title>AIConnect Leaderboards</title>
+  <link rel="stylesheet" href="/styles.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="/" aria-label="AIConnect Leaderboards home">
+      <span class="brand-mark" aria-hidden="true">A</span>
+      <span>AIConnect <strong>Leaderboards</strong></span>
+    </a>
+    <span id="voting-status" class="status-pill" aria-live="polite">Checking status…</span>
+  </header>
+
+  <main class="page-shell">
+    <section class="hero">
+      <p class="eyebrow">AIConnect · AI-Driven Development Bootcamp</p>
+      <h1>Good ideas deserve<br><span>to be seen.</span></h1>
+      <p class="hero-copy">Explore the teams’ systems, cast your vote, and follow the community leaderboard as results come in.</p>
+      <div class="hero-meta">
+        <span><span class="live-dot" aria-hidden="true"></span> Public leaderboard</span>
+        <span>One active vote per participant</span>
+      </div>
+    </section>
+
+    <section class="stats-grid" aria-label="Voting statistics">
+      <article class="stat-card">
+        <span class="stat-label">Total votes</span>
+        <strong id="total-votes" class="stat-value">—</strong>
+        <span class="stat-note">Votes submitted so far</span>
+      </article>
+      <article class="stat-card">
+        <span class="stat-label">Systems</span>
+        <strong id="total-systems" class="stat-value">—</strong>
+        <span class="stat-note">Eligible teams</span>
+      </article>
+      <article class="stat-card">
+        <span class="stat-label">Your selection</span>
+        <strong id="your-selection" class="stat-value stat-value-small">Not voted</strong>
+        <span class="stat-note" id="selection-note">Enter your name to participate</span>
+      </article>
+    </section>
+
+    <div id="notice" class="notice" role="status" aria-live="polite" hidden></div>
+
+    <section class="content-grid">
+      <div class="main-column">
+        <section class="panel" id="participant-panel">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">First step</p>
+              <h2>Join the vote</h2>
+            </div>
+            <span class="step-number">01</span>
+          </div>
+          <p class="muted">Use your name to join. No account or password needed. Each name can register once.</p>
+          <form id="participant-form" class="participant-form">
+            <label for="participant-name">Your name</label>
+            <div class="form-row">
+              <input id="participant-name" name="name" type="text" minlength="2" maxlength="50" autocomplete="name" placeholder="Enter your name" required>
+              <button class="button button-primary" type="submit" id="join-button">Join voting</button>
+            </div>
+            <p class="field-help">Your browser keeps a private voting credential so you can change your selection later.</p>
+          </form>
+          <div id="participant-summary" class="participant-summary" hidden>
+            <div class="avatar" id="participant-avatar">A</div>
+            <div class="participant-summary-copy">
+              <span class="muted">Voting as</span>
+              <strong id="participant-display-name"></strong>
+            </div>
+            <button type="button" id="change-participant" class="button button-quiet">Change name</button>
+          </div>
+        </section>
+
+        <section class="panel" id="systems-panel">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Make your choice</p>
+              <h2>Choose a system</h2>
+            </div>
+            <span class="step-number">02</span>
+          </div>
+          <p class="muted">Review the available teams and select the system you want to support.</p>
+          <div id="systems-list" class="systems-list" aria-live="polite">
+            <div class="loading-state">Loading systems…</div>
+          </div>
+        </section>
+      </div>
+
+      <aside class="panel leaderboard-panel" aria-labelledby="leaderboard-title">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Community results</p>
+            <h2 id="leaderboard-title">Leaderboard</h2>
+          </div>
+          <span class="live-label"><span class="live-dot" aria-hidden="true"></span> Live</span>
+        </div>
+        <p class="muted">Rankings update automatically while you explore.</p>
+        <ol id="leaderboard-list" class="leaderboard-list">
+          <li class="loading-state">Loading results…</li>
+        </ol>
+        <p class="leaderboard-footnote">Ties share the same rank. Results are public throughout voting.</p>
+      </aside>
+    </section>
+
+    <section class="how-it-works">
+      <div>
+        <span class="info-icon" aria-hidden="true">↗</span>
+        <div><strong>One active vote</strong><p>Your latest selection is the one that counts.</p></div>
+      </div>
+      <div>
+        <span class="info-icon" aria-hidden="true">↻</span>
+        <div><strong>Change it anytime</strong><p>You can change your vote until the organizer closes voting.</p></div>
+      </div>
+      <div>
+        <span class="info-icon" aria-hidden="true">◉</span>
+        <div><strong>Open results</strong><p>Everyone can see the leaderboard, even before voting closes.</p></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <span>AIConnect Leaderboards</span>
+    <span>Built for learning, collaboration, and AI-driven development.</span>
+  </footer>
+</body>
+</html>
