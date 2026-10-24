@@ -12,7 +12,7 @@ A lightweight voting app for AIConnect bootcamp teams, built with a Cloudflare W
 
 ## Status
 
-The MVP scaffold is ready for local setup. The actual team entries will be added to `systems.csv` later.
+The MVP scaffold is ready for local setup. The 12 AIConnect bootcamp teams are listed in `systems.csv`; entries with no supplied project description have a blank description.
 
 ## Quick start
 
@@ -50,7 +50,7 @@ See [Development and deployment](#development-and-deployment) below.
    npm run dev
    ```
 
-The starter `systems.csv` contains only its header until the team list is ready. Add one row per team with a stable unique `id`, `name`, and optional `description`.
+The `systems.csv` file lists the current teams. Add one row per team with a stable unique `id`, `name`, and optional `description`. Keep IDs stable once voting starts.
 
 ## API
 
