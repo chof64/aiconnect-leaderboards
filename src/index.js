@@ -50,14 +50,14 @@ async function routeApi(request, env, url) {
   if (request.method === "GET" && url.pathname === "/api/me") {
     const participant = await getAuthenticatedParticipant(request, env);
     if (!participant) return json({ error: "A valid participant credential is required." }, 401);
-    const vote = await env.DB.prepare(
-      "SELECT system_id, created_at, updated_at FROM votes WHERE participant_id = ?"
-    ).bind(participant.id).first();
-    return json({ participant: { name: participant.display_name }, vote });
+    const ratings = await env.DB.prepare(
+      "SELECT system_id, rating, created_at, updated_at FROM ratings WHERE participant_id = ? ORDER BY system_id"
+    ).bind(participant.id).all();
+    return json({ participant: { name: participant.display_name }, ratings: ratings.results || [] });
   }
 
-  if (request.method === "PUT" && url.pathname === "/api/vote") {
-    return castVote(request, env);
+  if (request.method === "PUT" && url.pathname === "/api/ratings") {
+    return saveRating(request, env);
   }
 
   return json({ error: "Not found." }, 404);
@@ -73,22 +73,36 @@ async function getStatus(env) {
 async function getSystemsWithVotes(env) {
   const systems = parseSystemsCsv(systemsCsv);
   const rows = await env.DB.prepare(
-    "SELECT system_id, COUNT(*) AS votes FROM votes GROUP BY system_id"
+    "SELECT system_id, COUNT(*) AS rating_count, SUM(rating) AS total_points, AVG(rating) AS average_rating FROM ratings GROUP BY system_id"
   ).all();
-  const counts = new Map((rows.results || []).map(row => [row.system_id, Number(row.votes)]));
-  const results = systems.map(system => ({
-    ...system,
-    votes: counts.get(system.id) || 0
-  }));
-  results.sort((a, b) => b.votes - a.votes || a.name.localeCompare(b.name));
-  let previousVotes = null;
+  const totals = new Map((rows.results || []).map(row => [row.system_id, {
+    ratingCount: Number(row.rating_count),
+    totalPoints: Number(row.total_points),
+    averageRating: Number(row.average_rating)
+  }]));
+  const results = systems.map(system => {
+    const total = totals.get(system.id) || { ratingCount: 0, totalPoints: 0, averageRating: 0 };
+    return { ...system, ...total };
+  });
+  results.sort((a, b) =>
+    b.averageRating - a.averageRating ||
+    b.ratingCount - a.ratingCount ||
+    a.name.localeCompare(b.name)
+  );
+
+  let previousAverage = null;
   let currentRank = 0;
   results.forEach((system, index) => {
-    if (system.votes !== previousVotes) currentRank = index + 1;
+    if (system.averageRating !== previousAverage) currentRank = index + 1;
     system.rank = currentRank;
-    previousVotes = system.votes;
+    previousAverage = system.averageRating;
   });
-  return { systems: results, totalVotes: results.reduce((sum, system) => sum + system.votes, 0) };
+
+  return {
+    systems: results,
+    totalRatings: results.reduce((sum, system) => sum + system.ratingCount, 0),
+    totalPoints: results.reduce((sum, system) => sum + system.totalPoints, 0)
+  };
 }
 
 async function registerParticipant(request, env) {
@@ -125,7 +139,7 @@ async function registerParticipant(request, env) {
   }
 }
 
-async function castVote(request, env) {
+async function saveRating(request, env) {
   if (!isJsonRequest(request)) return json({ error: "Send a JSON request." }, 415);
   const participant = await getAuthenticatedParticipant(request, env);
   if (!participant) return json({ error: "A valid participant credential is required." }, 401);
@@ -133,31 +147,35 @@ async function castVote(request, env) {
   const body = await readJson(request);
   if (!body.ok) return json({ error: "Invalid JSON body." }, 400);
   const systemId = typeof body.value.systemId === "string" ? body.value.systemId.trim() : "";
+  const rating = body.value.rating;
   const systems = parseSystemsCsv(systemsCsv);
   if (!systems.some(system => system.id === systemId)) {
     return json({ error: "Choose a valid system from the approved list." }, 400);
   }
+  if (!Number.isInteger(rating) || rating < 1 || rating > 5) {
+    return json({ error: "Rating must be a whole number from 1 to 5." }, 400);
+  }
 
-  // The voting-open check and write happen in one SQL statement to avoid a close/vote race.
+  // Enforce the open/closed state in the same statement as the rating upsert.
   const result = await env.DB.prepare(
-    `INSERT INTO votes (participant_id, system_id)
-     SELECT ?, ?
+    `INSERT INTO ratings (participant_id, system_id, rating)
+     SELECT ?, ?, ?
      WHERE EXISTS (SELECT 1 FROM voting_config WHERE id = 1 AND is_open = 1)
-     ON CONFLICT(participant_id) DO UPDATE SET
-       system_id = excluded.system_id,
+     ON CONFLICT(participant_id, system_id) DO UPDATE SET
+       rating = excluded.rating,
        updated_at = CURRENT_TIMESTAMP`
-  ).bind(participant.id, systemId).run();
+  ).bind(participant.id, systemId, rating).run();
 
   if (!result.meta || result.meta.changes === 0) {
     const status = await getStatus(env);
     if (!status.votingOpen) return json({ error: "Voting is closed." }, 423);
-    return json({ error: "Vote could not be saved." }, 500);
+    return json({ error: "Rating could not be saved." }, 500);
   }
 
-  const vote = await env.DB.prepare(
-    "SELECT system_id, created_at, updated_at FROM votes WHERE participant_id = ?"
-  ).bind(participant.id).first();
-  return json({ message: "Vote saved.", vote });
+  const savedRating = await env.DB.prepare(
+    "SELECT system_id, rating, created_at, updated_at FROM ratings WHERE participant_id = ? AND system_id = ?"
+  ).bind(participant.id, systemId).first();
+  return json({ message: "Rating saved.", rating: savedRating });
 }
 
 async function getAuthenticatedParticipant(request, env) {
