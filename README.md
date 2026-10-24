@@ -12,7 +12,7 @@ A lightweight voting app for AIConnect bootcamp teams, built with a Cloudflare W
 
 ## Status
 
-Initial implementation in progress. The actual team entries will be added to `systems.csv` later.
+The MVP scaffold is ready for local setup. The actual team entries will be added to `systems.csv` later.
 
 ## Quick start
 
@@ -41,7 +41,7 @@ See [Development and deployment](#development-and-deployment) below.
    Copy the returned database ID into `wrangler.jsonc`.
 
    ```sh
-   npx wrangler d1 migrations apply DB --local
+   npm run db:local
    ```
 
 3. Start the local server:
@@ -87,7 +87,7 @@ The Worker checks voting status in the same SQL statement that writes a vote, so
 2. Apply migrations remotely:
 
    ```sh
-   npx wrangler d1 migrations apply DB --remote
+   npm run db:remote
    ```
 
 3. Run `npm run dev` for local development or `npm run deploy` to deploy manually.
