@@ -18,7 +18,7 @@
     {
       "binding": "DB",
       "database_name": "aiconnect-leaderboards",
-      "database_id": "00000000-0000-0000-0000-000000000000",
+      "database_id": "e638cf3a-85db-4b30-9895-5b6a96f67ce4",
       "migrations_dir": "migrations"
     }
   ]
